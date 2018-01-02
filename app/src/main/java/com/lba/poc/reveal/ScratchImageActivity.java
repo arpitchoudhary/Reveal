@@ -1,4 +1,4 @@
-package com.cooltechworks.scratchview.demo;
+package com.lba.poc.reveal;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,9 +12,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.cooltechworks.scratchview.widgets.ScratchImageView;
+import com.lba.poc.widgets.ScratchImageView;
 
-public class CaptchaActivity extends AppCompatActivity implements ScratchImageView.IRevealListener {
+public class ScratchImageActivity extends AppCompatActivity implements ScratchImageView.IRevealListener {
 
     private TextView revealText;
     private ScratchImageView scratchImageView;
@@ -22,7 +22,7 @@ public class CaptchaActivity extends AppCompatActivity implements ScratchImageVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_captcha);
+        setContentView(R.layout.activity_scratch_image);
 
         scratchImageView = findViewById(R.id.scratch_view);
         scratchImageView.setRevealListener(this);

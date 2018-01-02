@@ -1,4 +1,4 @@
-package com.cooltechworks.scratchview.demo;
+package com.lba.poc.reveal;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onImageViewDemoClick(View v) {
-        startActivity(new Intent(this, CaptchaActivity.class));
+        startActivity(new Intent(this, ScratchImageActivity.class));
     }
 
 }

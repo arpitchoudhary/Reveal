@@ -1,4 +1,4 @@
-package com.cooltechworks.scratchview.widgets;
+package com.lba.poc.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -20,7 +20,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.cooltechworks.scratchview.demo.R;
+import com.lba.poc.reveal.R;
 
 import java.nio.ByteBuffer;
 
@@ -97,8 +97,6 @@ public class ScratchImageView extends AppCompatImageView {
         mErasePaint.setStyle(Paint.Style.STROKE);
         mErasePaint.setStrokeJoin(Paint.Join.BEVEL);
         mErasePaint.setStrokeCap(Paint.Cap.ROUND);
-
-        mGradientBgPaint = new Paint();
 
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 

@@ -5,11 +5,12 @@ android {
     buildToolsVersion "26.0.2"
 
     defaultConfig {
-        applicationId "com.cooltechworks.scratchview.demo"
+        applicationId "com.lba.poc.reveal"
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        resValue "string", "app_name", "PoC"
     }
     buildTypes {
         release {

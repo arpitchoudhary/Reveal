@@ -25,7 +25,7 @@
             android:scaleType="fitXY"
             android:src="@drawable/img_sample2" />
 
-        <com.cooltechworks.scratchview.widgets.ScratchImageView
+        <com.lba.poc.widgets.ScratchImageView
             android:id="@+id/scratch_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

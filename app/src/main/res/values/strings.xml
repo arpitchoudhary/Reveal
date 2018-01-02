@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ScratchViewDemo</string>
     <string name="price">\u20b9 1400</string>
     <string name="price_strike"><strike>\u20b9 1400</strike> <font fgcolor="red"> \u20b9 1200 </font></string>
     <string name="clothing_title">Basics Blue Casuals</string>
