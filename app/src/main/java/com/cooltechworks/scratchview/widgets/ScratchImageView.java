@@ -1,13 +1,12 @@
 /**
- *
  * Copyright 2016 Harish Sridharan
-
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,191 +14,208 @@
  * limitations under the License.
  */
 
-package com.cooltechworks.views;
+package com.cooltechworks.scratchview.widgets;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.ImageView;
 
-import com.cooltechworks.utils.BitmapUtils;
+import com.cooltechworks.scratchview.demo.R;
 
+import java.nio.ByteBuffer;
 
-/**
- * Created by Harish on 25/03/16.
- */
-public class ScratchImageView extends ImageView {
+public class ScratchImageView extends AppCompatImageView {
 
+    private static final String TAG = "ScratchImageView";
 
-    public interface IRevealListener {
-        public void onRevealed(ScratchImageView iv);
-        public void onRevealPercentChangedListener(ScratchImageView siv, float percent);
-    }
+    private static final float TOUCH_TOLERANCE = 4;
 
     public static final float STROKE_WIDTH = 12f;
 
     private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 4;
 
-    /**
-     * Bitmap holding the scratch region.
-     */
-    private Bitmap mScratchBitmap;
+    private float revealThreshold = 100;
 
-    /**
-     * Drawable canvas area through which the scratchable area is drawn.
-     */
-    private Canvas mCanvas;
+    private int defaultImage = R.drawable.ic_scratch_pattern;
 
-    /**
-     * Path holding the erasing path done by the user.
-     */
-    private Path mErasePath;
+    private Bitmap mScratchBitmap, mShadowBitmap;
 
-    /**
-     * Path to indicate where the user have touched.
-     */
-    private Path mTouchPath;
-
-    /**
-     * Paint properties for drawing the scratch area.
-     */
-    private Paint mBitmapPaint;
-
-    /**
-     * Paint properties for erasing the scratch region.
-     */
-    private Paint mErasePaint;
-
-    /**
-     * Gradient paint properties that lies as a background for scratch region.
-     */
-    private Paint mGradientBgPaint;
-
-    /**
-     * Sample Drawable bitmap having the scratch pattern.
-     */
     private BitmapDrawable mDrawable;
 
-    /**
-     * Listener object callback reference to send back the callback when the image has been revealed.
-     */
+    private Paint mBitmapPaint, mErasePaint, mGradientBgPaint/*, mShadowPaint*/;
+
+    private Path mErasePath, mTouchPath, mShadowPath;
+
+    private Canvas mCanvas, mShadowCanvas;
+
     private IRevealListener mRevealListener;
 
-    /**
-     * Reveal percent value.
-     */
     private float mRevealPercent;
 
-    /**
-     * Thread Count
-     */
     private int mThreadCount = 0;
 
+    private boolean mDrawn, mRevealed, mHasShadow;
+
+    private int mShadowColor;
+    private int mOffset;
+
+    private boolean mEnabled = true;
 
     public ScratchImageView(Context context) {
         super(context);
-        init();
-
+        init(null);
     }
 
-    public ScratchImageView(Context context, AttributeSet set) {
-        super(context, set);
-        init();
+    public ScratchImageView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(attrs);
     }
 
     public ScratchImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(attrs);
     }
 
     /**
      * Set the strokes width based on the parameter multiplier.
+     *
      * @param multiplier can be 1,2,3 and so on to set the stroke width of the paint.
      */
     public void setStrokeWidth(int multiplier) {
         mErasePaint.setStrokeWidth(multiplier * STROKE_WIDTH);
     }
 
-    /**
-     * Initialises the paint drawing elements.
-     */
-    private void init() {
+    private void init(AttributeSet attrs) {
 
-
+        mErasePath = new Path();
         mTouchPath = new Path();
 
         mErasePaint = new Paint();
         mErasePaint.setAntiAlias(true);
         mErasePaint.setDither(true);
-        mErasePaint.setColor(0xFFFF0000);
+        mErasePaint.setColor(Color.RED);
         mErasePaint.setStyle(Paint.Style.STROKE);
         mErasePaint.setStrokeJoin(Paint.Join.BEVEL);
         mErasePaint.setStrokeCap(Paint.Cap.ROUND);
-        setStrokeWidth(6);
 
         mGradientBgPaint = new Paint();
 
-        mErasePath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
-        Bitmap scratchBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scratch_pattern);
+        int strokeWidth = 6;
+        int bitmapResource = defaultImage;
+        if (attrs != null) {
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ScratchImageView);
+            strokeWidth = a.getInteger(R.styleable.ScratchImageView_strokeWidth, strokeWidth);
+            defaultImage = a.getResourceId(R.styleable.ScratchImageView_scratchDefaultSource, defaultImage);
+            bitmapResource = a.getResourceId(R.styleable.ScratchImageView_scratchSource, defaultImage);
+            revealThreshold = a.getFloat(R.styleable.ScratchImageView_revealThreshold, revealThreshold);
+            int transparent = ContextCompat.getColor(getContext(), android.R.color.transparent);
+            int shadowColor = a.getColor(R.styleable.ScratchImageView_shadowColor, transparent);
+            mHasShadow = shadowColor != transparent;
+            if (mHasShadow) {
+                mShadowColor = shadowColor;
+                mOffset = a.getInteger(R.styleable.ScratchImageView_shadowOffset, 3);
+            }
+        }
+        setStrokeWidth(strokeWidth);
+
+        Bitmap scratchBitmap = BitmapFactory.decodeResource(getResources(), bitmapResource);
         mDrawable = new BitmapDrawable(getResources(), scratchBitmap);
-        mDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+
+        if (revealThreshold > 100F) {
+            revealThreshold = 100F;
+        }
 
         setEraserMode();
+    }
 
+    public void setDrawable(BitmapDrawable mDrawable) {
+        Log.v(TAG, "setDrawable called");
+        this.mDrawable = mDrawable;
+        if (mDrawn) {
+            decorateScratchable();
+            invalidate();
+        }
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        mScratchBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        Log.v(TAG, "onSizeChanged called");
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        mScratchBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mScratchBitmap);
 
-        Rect rect = new Rect(0, 0, mScratchBitmap.getWidth(), mScratchBitmap.getHeight());
+        if (mHasShadow) {
+            mShadowBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            mShadowBitmap.eraseColor(mShadowColor);
+            mShadowPath = new Path();
+            mShadowCanvas = new Canvas(mShadowBitmap);
+        }
+
+        decorateScratchable();
+        mDrawn = true;
+    }
+
+    private void decorateScratchable() {
+        Rect rect = new Rect(0, 0, getWidth(), getHeight());
         mDrawable.setBounds(rect);
 
-        int startGradientColor = ContextCompat.getColor(getContext(), R.color.scratch_start_gradient);
-        int endGradientColor = ContextCompat.getColor(getContext(), R.color.scratch_end_gradient);
-
-        mGradientBgPaint.setShader(new LinearGradient(0, 0, 0, getHeight(), startGradientColor, endGradientColor, Shader.TileMode.MIRROR));
-
-        mCanvas.drawRect(rect, mGradientBgPaint);
         mDrawable.draw(mCanvas);
+    }
+
+    public void setmEnabled(boolean mEnabled) {
+        this.mEnabled = mEnabled;
+    }
+
+    public boolean ismEnabled() {
+        return mEnabled;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-
         super.onDraw(canvas);
-        canvas.drawBitmap(mScratchBitmap, 0, 0, mBitmapPaint);
-        canvas.drawPath(mErasePath, mErasePaint);
 
+        Canvas c = new Canvas(mScratchBitmap);
+        c.drawPath(mErasePath, mErasePaint);
+
+        if (mHasShadow) {
+            c = new Canvas(mShadowBitmap);
+            c.drawPath(mShadowPath, mErasePaint);
+            canvas.drawBitmap(mShadowBitmap, 0, 0, mBitmapPaint);
+        }
+
+        canvas.drawBitmap(mScratchBitmap, 0, 0, mBitmapPaint);
     }
 
-    private void touch_start(float x, float y) {
+    private void touchStart(float x, float y) {
         mErasePath.reset();
         mErasePath.moveTo(x, y);
+
+        if (mHasShadow) {
+            mShadowPath.reset();
+            mShadowPath.moveTo(x + mOffset, y + mOffset);
+        }
+
         mX = x;
         mY = y;
     }
-
 
     /**
      * clears the scratch area to reveal the hidden image.
@@ -207,6 +223,9 @@ public class ScratchImageView extends ImageView {
     public void clear() {
 
         int[] bounds = getImageBounds();
+
+        if (bounds == null) return;
+
         int left = bounds[0];
         int top = bounds[1];
         int right = bounds[2];
@@ -223,27 +242,33 @@ public class ScratchImageView extends ImageView {
         bottom = top + height;
 
         Paint paint = new Paint();
-        paint.setXfermode(new PorterDuffXfermode(
-                PorterDuff.Mode.CLEAR));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
         mCanvas.drawRect(left, top, right, bottom, paint);
+        if (mHasShadow) {
+            mShadowCanvas.drawRect(left, top, right, bottom, paint);
+        }
+
         checkRevealed();
         invalidate();
     }
 
-
-    private void touch_move(float x, float y) {
+    private void touchMove(float x, float y) {
 
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mErasePath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+
+            if (mHasShadow) {
+                mShadowPath.quadTo(mX + mOffset, mY + mOffset, (x + mX) / 2 + mOffset, (y + mY) / 2 + mOffset);
+            }
+
             mX = x;
             mY = y;
 
             drawPath();
         }
-
 
         mTouchPath.reset();
         mTouchPath.addCircle(mX, mY, 30, Path.Direction.CW);
@@ -252,12 +277,28 @@ public class ScratchImageView extends ImageView {
 
     private void drawPath() {
         mErasePath.lineTo(mX, mY);
+
+        if (mHasShadow) {
+            mShadowPath.lineTo(mX + mOffset, mY + mOffset);
+        }
+
         // commit the path to our offscreen
         mCanvas.drawPath(mErasePath, mErasePaint);
+
+        if (mHasShadow) {
+            mShadowCanvas.drawPath(mShadowPath, mErasePaint);
+        }
+
         // kill this so we don't double draw
         mTouchPath.reset();
+
         mErasePath.reset();
         mErasePath.moveTo(mX, mY);
+
+        if (mHasShadow) {
+            mShadowPath.reset();
+            mShadowPath.moveTo(mX + mOffset, mY + mOffset);
+        }
 
         checkRevealed();
     }
@@ -266,27 +307,35 @@ public class ScratchImageView extends ImageView {
         clear();
     }
 
-    private void touch_up() {
+    private void touchUp() {
 
         drawPath();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mEnabled) return false;
+        if (mRevealed) {
+            if (mRevealListener != null) {
+                mRevealListener.onRevealed(this);
+            }
+            return false;
+        }
+
         float x = event.getX();
         float y = event.getY();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_start(x, y);
+                touchStart(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                touch_move(x, y);
+                touchMove(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                touch_up();
+                touchUp();
                 invalidate();
                 break;
             default:
@@ -299,16 +348,12 @@ public class ScratchImageView extends ImageView {
         return mErasePaint.getColor();
     }
 
-
     public Paint getErasePaint() {
         return mErasePaint;
     }
 
     public void setEraserMode() {
-
-        getErasePaint().setXfermode(new PorterDuffXfermode(
-                PorterDuff.Mode.CLEAR));
-
+        getErasePaint().setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
     }
 
     public void setRevealListener(IRevealListener listener) {
@@ -316,22 +361,28 @@ public class ScratchImageView extends ImageView {
     }
 
     public boolean isRevealed() {
-        return mRevealPercent == 1;
+        if (mRevealed) {
+            return mRevealed;
+        }
+        mRevealed = mRevealPercent * 100 >= revealThreshold;
+        return mRevealed;
     }
 
     private void checkRevealed() {
 
-        if(! isRevealed() && mRevealListener != null) {
+        if (!isRevealed() && mRevealListener != null) {
 
             int[] bounds = getImageBounds();
+
+            if (bounds == null) return;
+
             int left = bounds[0];
             int top = bounds[1];
             int width = bounds[2] - left;
             int height = bounds[3] - top;
 
             // Do not create multiple calls to compare.
-            if(mThreadCount > 1) {
-                Log.d("Captcha", "Count greater than 1");
+            if (mThreadCount > 1) {
                 return;
             }
 
@@ -349,8 +400,7 @@ public class ScratchImageView extends ImageView {
                         int height = params[3];
 
                         Bitmap croppedBitmap = Bitmap.createBitmap(mScratchBitmap, left, top, width, height);
-
-                        return BitmapUtils.getTransparentPixelPercent(croppedBitmap);
+                        return getTransparentPixelPercent(croppedBitmap);
                     } finally {
                         mThreadCount--;
                     }
@@ -358,20 +408,23 @@ public class ScratchImageView extends ImageView {
 
                 public void onPostExecute(Float percentRevealed) {
 
-                    // check if not revealed before.
-                    if( ! isRevealed()) {
+                    // check if not mRevealed before.
+                    boolean revealed = isRevealed();
 
+                    /*if (revealed) {
+                        clear();
+                        percentRevealed = 1F;
+                    }*/
+
+                    if (!revealed) {
                         float oldValue = mRevealPercent;
                         mRevealPercent = percentRevealed;
 
-                        if(oldValue != percentRevealed) {
+                        if (oldValue != percentRevealed) {
                             mRevealListener.onRevealPercentChangedListener(ScratchImageView.this, percentRevealed);
                         }
-
-                        // if now revealed.
-                        if( isRevealed()) {
-                            mRevealListener.onRevealed(ScratchImageView.this);
-                        }
+                    } else {
+                        mRevealListener.onRevealed(ScratchImageView.this);
                     }
                 }
             }.execute(left, top, width, height);
@@ -389,32 +442,36 @@ public class ScratchImageView extends ImageView {
         int vwidth = getWidth() - paddingLeft - paddingRight;
         int vheight = getHeight() - paddingBottom - paddingTop;
 
-        int centerX = vwidth/2;
-        int centerY = vheight/2;
-
+        int centerX = vwidth / 2;
+        int centerY = vheight / 2;
 
         Drawable drawable = getDrawable();
+
+        if (drawable == null) {
+            return null;
+        }
+
         Rect bounds = drawable.getBounds();
 
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
 
-        if(width <= 0) {
+        if (width <= 0) {
             width = bounds.right - bounds.left;
         }
 
-        if(height <= 0) {
+        if (height <= 0) {
             height = bounds.bottom - bounds.top;
         }
 
         int left;
         int top;
 
-        if(height > vheight) {
+        if (height > vheight) {
             height = vheight;
         }
 
-        if(width > vwidth) {
+        if (width > vwidth) {
             width = vwidth;
         }
 
@@ -443,9 +500,42 @@ public class ScratchImageView extends ImageView {
 
         }
 
-        return new int[] {left, top, left + width, top + height};
+        return new int[]{left, top, left + width, top + height};
     }
 
+    /**
+     * Finds the percentage of pixels that do are empty.
+     *
+     * @param bitmap input bitmap
+     * @return a value between 0.0 to 1.0 . Note the method will return 0.0 if either of bitmaps are null nor of same size.
+     */
+    private float getTransparentPixelPercent(Bitmap bitmap) {
 
+        if (bitmap == null) {
+            return 0f;
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(bitmap.getHeight() * bitmap.getRowBytes());
+        bitmap.copyPixelsToBuffer(buffer);
+
+        byte[] array = buffer.array();
+
+        int len = array.length;
+        int count = 0;
+
+        for (int i = 0; i < len; i++) {
+            if (array[i] == 0) {
+                count++;
+            }
+        }
+
+        return ((float) (count)) / len;
+    }
+
+    public interface IRevealListener {
+        void onRevealed(ScratchImageView iv);
+
+        void onRevealPercentChangedListener(ScratchImageView siv, float percent);
+    }
 
 }

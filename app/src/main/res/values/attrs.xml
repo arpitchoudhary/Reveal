@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ScratchImageView">
+        <attr name="strokeWidth" format="integer" />
+        <attr name="scratchDefaultSource" format="reference" />
+        <attr name="scratchSource" format="reference" />
+        <attr name="revealThreshold" format="float" />
+        <attr name="shadowColor" format="color" />
+        <attr name="shadowOffset" format="integer" />
+    </declare-styleable>
+</resources>

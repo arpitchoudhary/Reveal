@@ -7,4 +7,7 @@
     <color name="paint_background">#ddd</color>
     <color name="cart_bg">#f88c00</color>
 
+    <color name="scratch_start_gradient">#e5e5e5</color>
+    <color name="scratch_end_gradient">#cccccc</color>
+
 </resources>

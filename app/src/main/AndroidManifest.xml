@@ -8,19 +8,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".DemoClothingActivity"
-            android:label="@string/clothing_title"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-        </activity>
-
-        <activity
-            android:name=".CaptchaActivity"
-            android:label="@string/captcha_title"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-        </activity>
-        <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme">
@@ -30,6 +17,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".CaptchaActivity"
+            android:label="@string/captcha_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
