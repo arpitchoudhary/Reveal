@@ -292,6 +292,7 @@ public class ScratchImageView extends AppCompatImageView {
     private void touchUp() {
 
         drawPath();
+        mRevealListener.onTouchUp();
     }
 
     @Override
@@ -518,6 +519,8 @@ public class ScratchImageView extends AppCompatImageView {
         void onRevealed(ScratchImageView iv);
 
         void onRevealPercentChangedListener(ScratchImageView siv, float percent);
+
+        void onTouchUp();
     }
 
 }
