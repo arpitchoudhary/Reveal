@@ -1,9 +1,13 @@
 package com.lba.poc.reveal;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,13 +15,20 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lba.poc.widgets.ScratchImageView;
+import com.lba.poc.widgets.ShakeDetector;
 
-public class ScratchImageActivity extends AppCompatActivity implements ScratchImageView.IRevealListener {
+public class ScratchImageActivity extends AppCompatActivity implements ScratchImageView.IRevealListener, ShakeDetector.OnShakeListener {
 
     private TextView revealText;
     private ScratchImageView scratchImageView;
+
+    // The following are used for the shake detection
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private ShakeDetector mShakeDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +65,18 @@ public class ScratchImageActivity extends AppCompatActivity implements ScratchIm
             }
         };
         asyncTask.execute();
+
+// ShakeDetector initialization
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mShakeDetector = new ShakeDetector();
+        mShakeDetector.setOnShakeListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -84,5 +107,37 @@ public class ScratchImageActivity extends AppCompatActivity implements ScratchIm
     @Override
     public void onRevealPercentChangedListener(ScratchImageView view, float percent) {
         revealText.setText(getString(R.string.reveal_percentage, percent * 100));
+    }
+
+    @Override
+    public void onTouchUp() {
+        revealText.setText(getString(R.string.revealed));
+        scratchImageView.setVisibility(View.GONE);
+        Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        animation.setDuration(500L);
+        scratchImageView.setAnimation(animation);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Add the following line to register the Session Manager Listener onResume
+        mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    public void onPause() {
+        // Add the following line to unregister the Sensor Manager onPause
+        mSensorManager.unregisterListener(mShakeDetector);
+        super.onPause();
+    }
+
+    @Override
+    public void onShake() {
+        revealText.setText(getString(R.string.revealed));
+        scratchImageView.setVisibility(View.GONE);
+        Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        animation.setDuration(500L);
+        scratchImageView.setAnimation(animation);
     }
 }
