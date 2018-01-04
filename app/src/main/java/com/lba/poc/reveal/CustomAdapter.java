@@ -5,11 +5,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.lba.poc.model.ModuleItem;
 import com.lba.poc.viewholder.ScratchViewHolder;
 import com.lba.poc.viewholder.ShakeViewHolder;
 import com.lba.poc.viewholder.TapViewHolder;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by smohanthy on 1/3/18.
@@ -20,10 +23,12 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int TAPVIEW = 101;
     private static final int SHAKEVIEW = 102;
     private Activity context;
-    private ArrayList<String> items = new ArrayList<>();
+    private List<ModuleItem> items;
+    private RecyclerView.ViewHolder holder;
 
     public CustomAdapter(Activity context) {
         this.context = context;
+        items = Collections.synchronizedList(new ArrayList<ModuleItem>());
     }
 
     @Override
@@ -41,13 +46,17 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        this.holder = holder;
         if (holder instanceof ScratchViewHolder) {
             ((ScratchViewHolder) holder).bindHolder();
         }
 
         if (holder instanceof ShakeViewHolder) {
             ((ShakeViewHolder) holder).bindHolder();
-            ((ShakeViewHolder) holder).onResume();
+        }
+
+        if (holder instanceof TapViewHolder) {
+            ((TapViewHolder) holder).bindHolder();
         }
     }
 
@@ -58,18 +67,19 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        switch (position) {
-            case 0:
+        switch (items.get(position).template_type) {
+            case "scratch":
                 return SCRATCHVIEW;
-            case 1:
+            case "tap":
                 return TAPVIEW;
-            case 2:
+            case "shake":
                 return SHAKEVIEW;
+            default:
+                return SCRATCHVIEW;
         }
-        return SCRATCHVIEW;
     }
 
-    public void setItems(ArrayList<String> newItems) {
+    public void setItems(ArrayList<ModuleItem> newItems) {
         items.clear();
         if (newItems != null) {
             items.addAll(newItems);
@@ -77,4 +87,31 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.notifyDataSetChanged();
     }
 
+    public void updateViewHolderListener(String updateView) {
+        if (holder instanceof ScratchViewHolder && updateView.equals("scratch")) {
+            ((ScratchViewHolder) holder).registerListener();
+        }
+
+        if (holder instanceof ShakeViewHolder && updateView.equals("shake")) {
+            ((ShakeViewHolder) holder).onResume();
+        }
+
+        if (holder instanceof TapViewHolder && updateView.equals("tap")) {
+            ((TapViewHolder) holder).registerListener();
+        }
+    }
+
+    public void disableViewHolderListener(String updateView) {
+        if (holder instanceof ScratchViewHolder && updateView.equals("scratch")) {
+            ((ScratchViewHolder) holder).unRegisterListener();
+        }
+
+        if (holder instanceof ShakeViewHolder && updateView.equals("shake")) {
+            ((ShakeViewHolder) holder).onPause();
+        }
+
+        if (holder instanceof TapViewHolder && updateView.equals("tap")) {
+            ((TapViewHolder) holder).unRegisterListener();
+        }
+    }
 }

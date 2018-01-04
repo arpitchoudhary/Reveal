@@ -20,10 +20,11 @@
         android:id="@+id/itemRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="9dp"
+        android:layout_marginTop="5dp"
         android:background="@android:color/darker_gray"
         android:clipToPadding="false"
-        android:importantForAccessibility="yes"
-        android:paddingTop="20dp" />
+        android:importantForAccessibility="yes" />
 
     <View
         android:layout_width="wrap_content"
