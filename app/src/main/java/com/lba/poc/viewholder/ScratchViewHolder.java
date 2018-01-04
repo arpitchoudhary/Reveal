@@ -39,10 +39,11 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     public void bindHolder() {
         scratchImageView = itemView.findViewById(R.id.scratch_view);
         scratchImageView.setRevealListener(this);
-
         revealText = itemView.findViewById(R.id.percentage_revealed);
         revealText.setText(context.getString(R.string.reveal_percentage, 0F));
         scratchImageView.setmEnabled(false);
+        scratchImageView.setEnabled(false);
+
 
         AsyncTask<Void, Void, BitmapDrawable> asyncTask = new AsyncTask<Void, Void, BitmapDrawable>() {
             @Override
@@ -86,5 +87,15 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     @Override
     public void onTouchUp() {
 
+    }
+
+    public void registerListener() {
+        //TODO not working required update
+        scratchImageView.setEnabled(true);
+    }
+
+    public void unRegisterListener() {
+        //TODO not working required update
+        scratchImageView.setEnabled(false);
     }
 }
