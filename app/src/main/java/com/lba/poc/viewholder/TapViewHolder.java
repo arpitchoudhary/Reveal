@@ -14,10 +14,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.lba.poc.reveal.R;
 
@@ -25,11 +25,10 @@ import com.lba.poc.reveal.R;
  * Created by smohanthy on 1/3/18.
  */
 
-public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
+public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private Context context;
     private View itemView;
     private ImageView tapImageView;
-    private boolean enableListener;
 
     public TapViewHolder(View itemView, Context context) {
         super(itemView);
@@ -43,7 +42,8 @@ public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnTou
 
     public void bindHolder() {
         tapImageView = itemView.findViewById(R.id.scratch_view);
-        tapImageView.setOnTouchListener(this);
+        ((TextView)itemView.findViewById(R.id.percentage_revealed)).setText("Tap View");
+        tapImageView.setOnClickListener(this);
         AsyncTask<Void, Void, BitmapDrawable> asyncTask = new AsyncTask<Void, Void, BitmapDrawable>() {
             @Override
             protected BitmapDrawable doInBackground(Void... voids) {
@@ -69,43 +69,40 @@ public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnTou
     }
 
     public void registerListener() {
-        enableListener = true;
+        tapImageView.setEnabled(true);
     }
 
     public void unRegisterListener() {
-        enableListener = false;
+        tapImageView.setEnabled(false);
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_UP:
+    public void onClick(View v) {
+        if (v.getId() == R.id.scratch_view) {
+            int colorFrom = context.getResources().getColor(android.R.color.white);
+            int colorTo = context.getResources().getColor(android.R.color.transparent);
+            ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+            colorAnimation.setDuration(800);
+            colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    tapImageView.setColorFilter((int) animator.getAnimatedValue());
+                }
 
-                int colorFrom = context.getResources().getColor(android.R.color.white);
-                int colorTo = context.getResources().getColor(android.R.color.transparent);
-                ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-                colorAnimation.setDuration(800);
-                colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animator) {
-                        tapImageView.setColorFilter((int) animator.getAnimatedValue());
-                    }
+            });
+            ValueAnimator fadeAnim = ObjectAnimator.ofFloat(tapImageView, "alpha", 1f, 0f);
+            fadeAnim.setDuration(500);
 
-                });
-                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(tapImageView, "alpha", 1f, 0f);
-                fadeAnim.setDuration(500);
-
-                fadeAnim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        tapImageView.setVisibility(View.GONE);
-                    }
-                });
-                AnimatorSet animatorSet = new AnimatorSet();
-                animatorSet.play(colorAnimation).with(fadeAnim);
-                animatorSet.start();
-                break;
+            fadeAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    tapImageView.setVisibility(View.GONE);
+                }
+            });
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.play(colorAnimation).with(fadeAnim);
+            animatorSet.start();
         }
-        return enableListener;
+
     }
 }

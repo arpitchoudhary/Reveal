@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import com.lba.poc.model.ModuleItem;
 import com.lba.poc.viewholder.ScratchViewHolder;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private CustomAdapter adapter;
-    private ArrayList<ModuleItem> items = new ArrayList<>();
     private RecyclerView itemRecyclerView;
     protected RecyclerView.LayoutManager mLayoutManager;
     int scrollPosition = 0;
@@ -60,11 +60,34 @@ public class MainActivity extends AppCompatActivity {
 
     public void startTracking() {
 
+        itemRecyclerView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(new ViewTreeObserver
+                        .OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (!firstTrackFlag) {
+                            int firstVisibleItemPosition = ((LinearLayoutManager)
+                                    itemRecyclerView.getLayoutManager())
+                                    .findFirstVisibleItemPosition();
+
+                            int lastVisibleItemPosition = ((LinearLayoutManager)
+                                    itemRecyclerView.getLayoutManager())
+                                    .findLastVisibleItemPosition();
+
+                            analyzeAndAddViewData(firstVisibleItemPosition,
+                                    lastVisibleItemPosition);
+                            firstTrackFlag = true;
+                        }
+                    }
+                });
+
         itemRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                findViewVisibility(recyclerView);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    findViewVisibility(recyclerView);
+                }
             }
         });
     }
@@ -86,26 +109,25 @@ public class MainActivity extends AppCompatActivity {
             // to the threshold provided. If it falls under the desired limit,
             // add it to the tracking data.
 
-            double minimumVisibleHeightThreshold = 60.0f;
+            double minimumVisibleHeightThreshold = 65.0f;
             boolean isVisible = getVisibleHeightPercentage(itemView) >= minimumVisibleHeightThreshold;
             boolean isHide = getVisibleHeightPercentage(itemView) < minimumVisibleHeightThreshold;
             RecyclerView.ViewHolder viewHolder = itemRecyclerView.findViewHolderForAdapterPosition(viewPosition);
             if (viewHolder instanceof ShakeViewHolder && isVisible) {
-                adapter.updateViewHolderListener("shake");
+                adapter.updateViewHolderListener(viewHolder);
             } else if (viewHolder instanceof ShakeViewHolder && isHide) {
-                adapter.disableViewHolderListener("shake");
+                adapter.disableViewHolderListener(viewHolder);
             }
-
             if (viewHolder instanceof TapViewHolder && isVisible) {
-                adapter.updateViewHolderListener("tap");
+                adapter.updateViewHolderListener(viewHolder);
             } else if (viewHolder instanceof TapViewHolder && isHide) {
-                adapter.disableViewHolderListener("tap");
+                adapter.disableViewHolderListener(viewHolder);
             }
 
             if (viewHolder instanceof ScratchViewHolder && isVisible) {
-                adapter.updateViewHolderListener("scratch");
+                adapter.updateViewHolderListener(viewHolder);
             } else if (viewHolder instanceof ScratchViewHolder && isHide) {
-                adapter.disableViewHolderListener("scratch");
+                adapter.disableViewHolderListener(viewHolder);
             }
 
         }
@@ -148,10 +170,16 @@ public class MainActivity extends AppCompatActivity {
         moduleItem3.overlayImagePath = "//overlay/image/path";
         moduleItem3.template_type = "tap";
 
+        ModuleItem moduleItem4 = new ModuleItem();
+        moduleItem4.imagePath = "//image/path";
+        moduleItem4.overlayImagePath = "//overlay/image/path";
+        moduleItem4.template_type = "scratch";
+
         moduleItems.add(moduleItem);
         moduleItems.add(moduleItem1);
         moduleItems.add(moduleItem2);
         moduleItems.add(moduleItem3);
+        moduleItems.add(moduleItem4);
 
         return moduleItems;
     }
