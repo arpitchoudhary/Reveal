@@ -24,11 +24,15 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int SHAKEVIEW = 102;
     private Activity context;
     private List<ModuleItem> items;
-    private RecyclerView.ViewHolder holder;
+    private ScrollListener scrollListener;
 
     public CustomAdapter(Activity context) {
         this.context = context;
         items = Collections.synchronizedList(new ArrayList<ModuleItem>());
+    }
+
+    public void setScrollListener(ScrollListener scrollListener) {
+        this.scrollListener = scrollListener;
     }
 
     @Override
@@ -46,9 +50,10 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        this.holder = holder;
         if (holder instanceof ScratchViewHolder) {
             ((ScratchViewHolder) holder).bindHolder();
+            ((ScratchViewHolder) holder).setScrollListener(scrollListener);
+
         }
 
         if (holder instanceof ShakeViewHolder) {
