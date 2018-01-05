@@ -119,6 +119,11 @@ public class ScratchImageActivity extends AppCompatActivity implements ScratchIm
     }
 
     @Override
+    public void setViewForScroll(boolean isScrollRequired) {
+
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         // Add the following line to register the Session Manager Listener onResume

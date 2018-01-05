@@ -11,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lba.poc.reveal.R;
+import com.lba.poc.reveal.ScrollListener;
 import com.lba.poc.widgets.ScratchImageView;
 
 /**
@@ -25,6 +27,11 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     private TextView revealText;
     private ScratchImageView scratchImageView;
     private View itemView;
+    private ScrollListener scrollListener;
+
+    public void setScrollListener(ScrollListener scrollListener) {
+        this.scrollListener = scrollListener;
+    }
 
     public static ScratchViewHolder getInstance(LayoutInflater inflater, ViewGroup parent, Context context) {
         return new ScratchViewHolder(inflater.inflate(R.layout.activity_scratch_image, parent, false), context);
@@ -62,6 +69,7 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
             protected void onPostExecute(BitmapDrawable drawable) {
                 if (drawable != null) {
                     scratchImageView.setDrawable(drawable);
+                    itemView.findViewById(R.id.image_view).setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -75,6 +83,7 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
         Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.fade_out);
         animation.setDuration(500L);
         view.setAnimation(animation);
+        scrollListener.updateScroll(true);
     }
 
     @Override
@@ -85,6 +94,11 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     @Override
     public void onTouchUp() {
 
+    }
+
+    @Override
+    public void setViewForScroll(boolean isScrollRequired) {
+        scrollListener.updateScroll(isScrollRequired);
     }
 
     public void registerListener() {

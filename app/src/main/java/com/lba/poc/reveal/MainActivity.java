@@ -17,12 +17,13 @@ import com.lba.poc.viewholder.TapViewHolder;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ScrollListener {
     private CustomAdapter adapter;
     private RecyclerView itemRecyclerView;
     protected RecyclerView.LayoutManager mLayoutManager;
     int scrollPosition = 0;
     boolean firstTrackFlag;
+    boolean canScroll = true;
 
 
     @Override
@@ -30,7 +31,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         adapter = new CustomAdapter(this);
-        mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return canScroll;
+            }
+        };
         // If a layout manager has already been set, get current scroll position.
         itemRecyclerView = findViewById(R.id.itemRecyclerView);
         itemRecyclerView.setAdapter(adapter);
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         }
         itemRecyclerView.scrollToPosition(scrollPosition);
         adapter.setItems(getModuleItem());
+        adapter.setScrollListener(this);
         startTracking();
     }
 
@@ -184,4 +191,8 @@ public class MainActivity extends AppCompatActivity {
         return moduleItems;
     }
 
+    @Override
+    public void updateScroll(boolean isScroll) {
+        canScroll = isScroll;
+    }
 }

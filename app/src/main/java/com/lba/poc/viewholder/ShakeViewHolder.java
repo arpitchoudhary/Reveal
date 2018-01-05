@@ -78,6 +78,7 @@ public class ShakeViewHolder extends RecyclerView.ViewHolder implements ShakeDet
             protected void onPostExecute(BitmapDrawable drawable) {
                 if (drawable != null) {
                     shakeImageView.setImageDrawable(drawable);
+                    itemView.findViewById(R.id.image_view).setVisibility(View.VISIBLE);
                 }
             }
         };

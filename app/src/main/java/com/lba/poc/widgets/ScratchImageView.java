@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.lba.poc.reveal.R;
+import com.lba.poc.reveal.ScrollListener;
 
 import java.nio.ByteBuffer;
 
@@ -60,6 +61,7 @@ public class ScratchImageView extends AppCompatImageView {
     private int mOffset;
 
     private boolean mEnabled = true;
+
 
     public ScratchImageView(Context context) {
         super(context);
@@ -197,6 +199,7 @@ public class ScratchImageView extends AppCompatImageView {
 
         mX = x;
         mY = y;
+        mRevealListener.setViewForScroll(false);
     }
 
     /**
@@ -290,8 +293,8 @@ public class ScratchImageView extends AppCompatImageView {
     }
 
     private void touchUp() {
-
         drawPath();
+        mRevealListener.setViewForScroll(true);
         mRevealListener.onTouchUp();
     }
 
@@ -521,6 +524,8 @@ public class ScratchImageView extends AppCompatImageView {
         void onRevealPercentChangedListener(ScratchImageView siv, float percent);
 
         void onTouchUp();
+
+        void setViewForScroll(boolean isScrollRequired);
     }
 
 }
