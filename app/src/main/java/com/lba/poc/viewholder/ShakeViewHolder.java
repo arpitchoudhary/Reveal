@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.lba.poc.reveal.R;
 import com.lba.poc.widgets.ShakeDetector;
@@ -51,6 +52,7 @@ public class ShakeViewHolder extends RecyclerView.ViewHolder implements ShakeDet
 
     public void bindHolder() {
         shakeImageView = itemView.findViewById(R.id.scratch_view);
+        ((TextView) itemView.findViewById(R.id.percentage_revealed)).setText("Shake View");
         // ShakeDetector initialization
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager

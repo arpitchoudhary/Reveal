@@ -87,31 +87,31 @@ public class CustomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.notifyDataSetChanged();
     }
 
-    public void updateViewHolderListener(String updateView) {
-        if (holder instanceof ScratchViewHolder && updateView.equals("scratch")) {
-            ((ScratchViewHolder) holder).registerListener();
+    public void updateViewHolderListener(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof ScratchViewHolder) {
+            ((ScratchViewHolder) viewHolder).registerListener();
         }
 
-        if (holder instanceof ShakeViewHolder && updateView.equals("shake")) {
-            ((ShakeViewHolder) holder).onResume();
+        if (viewHolder instanceof ShakeViewHolder) {
+            ((ShakeViewHolder) viewHolder).onResume();
         }
 
-        if (holder instanceof TapViewHolder && updateView.equals("tap")) {
-            ((TapViewHolder) holder).registerListener();
+        if (viewHolder instanceof TapViewHolder) {
+            ((TapViewHolder) viewHolder).registerListener();
         }
     }
 
-    public void disableViewHolderListener(String updateView) {
-        if (holder instanceof ScratchViewHolder && updateView.equals("scratch")) {
-            ((ScratchViewHolder) holder).unRegisterListener();
+    public void disableViewHolderListener(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof ScratchViewHolder) {
+            ((ScratchViewHolder) viewHolder).unRegisterListener();
         }
 
-        if (holder instanceof ShakeViewHolder && updateView.equals("shake")) {
-            ((ShakeViewHolder) holder).onPause();
+        if (viewHolder instanceof ShakeViewHolder) {
+            ((ShakeViewHolder) viewHolder).onPause();
         }
 
-        if (holder instanceof TapViewHolder && updateView.equals("tap")) {
-            ((TapViewHolder) holder).unRegisterListener();
+        if (viewHolder instanceof TapViewHolder) {
+            ((TapViewHolder) viewHolder).unRegisterListener();
         }
     }
 }

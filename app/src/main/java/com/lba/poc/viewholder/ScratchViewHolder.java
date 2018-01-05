@@ -42,7 +42,6 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
         revealText = itemView.findViewById(R.id.percentage_revealed);
         revealText.setText(context.getString(R.string.reveal_percentage, 0F));
         scratchImageView.setmEnabled(false);
-        scratchImageView.setEnabled(false);
 
 
         AsyncTask<Void, Void, BitmapDrawable> asyncTask = new AsyncTask<Void, Void, BitmapDrawable>() {
@@ -63,7 +62,6 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
             protected void onPostExecute(BitmapDrawable drawable) {
                 if (drawable != null) {
                     scratchImageView.setDrawable(drawable);
-                    scratchImageView.setmEnabled(true);
                 }
             }
         };
@@ -90,12 +88,10 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     }
 
     public void registerListener() {
-        //TODO not working required update
-        scratchImageView.setEnabled(true);
+        scratchImageView.setmEnabled(true);
     }
 
     public void unRegisterListener() {
-        //TODO not working required update
-        scratchImageView.setEnabled(false);
+        scratchImageView.setmEnabled(false);
     }
 }
