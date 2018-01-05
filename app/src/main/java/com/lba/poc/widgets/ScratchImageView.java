@@ -199,7 +199,7 @@ public class ScratchImageView extends AppCompatImageView {
 
         mX = x;
         mY = y;
-        mRevealListener.updateScrollLock();
+        mRevealListener.setViewForScroll(false);
     }
 
     /**
@@ -293,9 +293,8 @@ public class ScratchImageView extends AppCompatImageView {
     }
 
     private void touchUp() {
-
         drawPath();
-        mRevealListener.updateScrollRelease();
+        mRevealListener.setViewForScroll(true);
         mRevealListener.onTouchUp();
     }
 
@@ -526,9 +525,7 @@ public class ScratchImageView extends AppCompatImageView {
 
         void onTouchUp();
 
-        void updateScrollLock();
-
-        void updateScrollRelease();
+        void setViewForScroll(boolean isScrollRequired);
     }
 
 }

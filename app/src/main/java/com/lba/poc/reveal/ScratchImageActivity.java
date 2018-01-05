@@ -119,12 +119,7 @@ public class ScratchImageActivity extends AppCompatActivity implements ScratchIm
     }
 
     @Override
-    public void updateScrollLock() {
-
-    }
-
-    @Override
-    public void updateScrollRelease() {
+    public void setViewForScroll(boolean isScrollRequired) {
 
     }
 

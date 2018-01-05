@@ -42,7 +42,7 @@ public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnCli
 
     public void bindHolder() {
         tapImageView = itemView.findViewById(R.id.scratch_view);
-        ((TextView)itemView.findViewById(R.id.percentage_revealed)).setText("Tap View");
+        ((TextView) itemView.findViewById(R.id.percentage_revealed)).setText("Tap View");
         tapImageView.setOnClickListener(this);
         AsyncTask<Void, Void, BitmapDrawable> asyncTask = new AsyncTask<Void, Void, BitmapDrawable>() {
             @Override
@@ -62,6 +62,7 @@ public class TapViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             protected void onPostExecute(BitmapDrawable drawable) {
                 if (drawable != null) {
                     tapImageView.setImageDrawable(drawable);
+                    itemView.findViewById(R.id.image_view).setVisibility(View.VISIBLE);
                 }
             }
         };

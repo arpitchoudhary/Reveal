@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lba.poc.reveal.R;
@@ -68,6 +69,7 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
             protected void onPostExecute(BitmapDrawable drawable) {
                 if (drawable != null) {
                     scratchImageView.setDrawable(drawable);
+                    itemView.findViewById(R.id.image_view).setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -95,13 +97,8 @@ public class ScratchViewHolder extends RecyclerView.ViewHolder implements Scratc
     }
 
     @Override
-    public void updateScrollLock() {
-        scrollListener.updateScroll(false);
-    }
-
-    @Override
-    public void updateScrollRelease() {
-        scrollListener.updateScroll(true);
+    public void setViewForScroll(boolean isScrollRequired) {
+        scrollListener.updateScroll(isScrollRequired);
     }
 
     public void registerListener() {
